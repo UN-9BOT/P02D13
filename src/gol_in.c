@@ -10,8 +10,6 @@ void prEpoch(int[][COL]);                       // Печать кадра
 int checkArea(int [][COL], int, int);          // Чек выхода за границы
 void generateEpoch(int[][COL]);                      // Генерация Эпохи
 int nextState(int, int);                        // Генерация состояния элемента для следующей эпохи
-void prDebug(int[][COL]);                       // Дебаг
-void nullBox(int[][COL]);                       // Зануление бокса
 int checkDie(int[][COL]);                       // Чек на гибель бокса
 
 int main(void) {
@@ -68,13 +66,6 @@ void prEpoch(int box[][COL]) {
     }
 }
 
-/* void nullBox(int box[][COL]) { */
-/*     for (int n = 0; n < ROW; n++) { */
-/*         for (int m = 0; m < COL; m++) { */
-/*             box[n][m] = 0; */
-/*         } */
-/*     } */
-/* } */
 
 int relN(int n) { return ((n + ROW) % ROW); }  // чек выхода за границы относительно 1 координаты N
 int relM(int m) { return ((m + COL) % COL); }  // чек выхода за границы относительно 1 координаты M
@@ -106,14 +97,6 @@ int nextState(int state, int counter) {
     return (res);
 }
 
-void prDebug(int box[][COL]) {
-    for (int n = 0; n < ROW; n++) {
-        for (int m = 0; m < COL; m++) {
-            printf("%d", box[n][m]);
-        }
-        printf("\n");
-    }
-}
 
 void copyBox(int outBox[][COL], int inBox[][COL]) {
     for (int n = 0; n < ROW; n++) {
@@ -127,8 +110,6 @@ void generateEpoch(int box[][COL]) {
     int nextBox[ROW][COL];
     clear();
     prEpoch(box);
-    /* prDebug(box); */
-    /* nullBox(nextBox); */
     for (int n = 0; n < ROW; n++) {
         for (int m = 0; m < COL; m++) {
             nextBox[n][m] = nextState(box[n][m], checkArea(box, n, m));
