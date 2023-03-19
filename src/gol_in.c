@@ -3,23 +3,21 @@
 
 #define ROW 25
 #define COL 80
-#define clear() printf("\033[H\033[J") 
+#define clear() printf("\033[H\033[J")
 
-void startBox(int[][COL], int *);               // Забираем начальный бокс и Считываем скорость
-void prEpoch(int[][COL]);                       // Печать кадра
-int checkArea(int [][COL], int, int);          // Чек выхода за границы
-void generateEpoch(int[][COL]);                      // Генерация Эпохи
-int nextState(int, int);                        // Генерация состояния элемента для следующей эпохи
-void prDebug(int[][COL]);                       // Дебаг
-void nullBox(int[][COL]);                       // Зануление бокса
-int checkDie(int[][COL]);                       // Чек на гибель бокса
+void startBox(int[][COL], int *);  // Забираем начальный бокс и Считываем скорость
+void generateEpoch(int[][COL]);  // Генерация Эпохи
+void prEpoch(int[][COL]);        // Печать кадра
+int nextState(int, int);  // Генерация состояния элемента для следующей эпохи
+int checkArea(int[][COL], int, int);  // Чек выхода за границы
+int checkDie(int[][COL]);             // Чек на гибель бокса
 
 int main(void) {
-    int box[ROW][COL], speed;  
+    int box[ROW][COL], speed;
     int countEpoch = 0;
 
     startBox(box, &speed);
-    while (checkDie(box) && countEpoch++ < 10000) {
+    while (checkDie(box) && countEpoch++ < 1000) {
         generateEpoch(box);
         usleep(speed);
     }
@@ -27,11 +25,9 @@ int main(void) {
 }
 
 void startBox(int box[][COL], int *speed) {
-    int c = 0;
     for (int n = 0; n < ROW; n++) {
         for (int m = 0; m <= COL; m++) {
-            c = getchar();
-            box[n][m] = (c == '1') ? 1 : 0;
+            box[n][m] = (getchar() == '1') ? 1 : 0;
         }
     }
 
@@ -41,7 +37,9 @@ void startBox(int box[][COL], int *speed) {
         printf("Введите скорость\n");
         printf("0 для стандартной (100 000)\n");
         scanf("%d", speed);
-        if (*speed == 0) { *speed = 50000; }
+        if (*speed == 0) {
+            *speed = 50000;
+        }
     }
 }
 
@@ -58,30 +56,18 @@ int checkDie(int box[][COL]) {
 void prEpoch(int box[][COL]) {
     for (int n = 0; n < ROW; n++) {
         for (int m = 0; m < COL; m++) {
-            if (box[n][m] == 1) {
-                printf("X");
-            } else {
-                printf(" ");
-            }
+            (box[n][m] == 1) ? printf("*") : printf(" ");
         }
         printf("\n");
     }
 }
 
-/* void nullBox(int box[][COL]) { */
-/*     for (int n = 0; n < ROW; n++) { */
-/*         for (int m = 0; m < COL; m++) { */
-/*             box[n][m] = 0; */
-/*         } */
-/*     } */
-/* } */
-
-int relN(int n) { return ((n + ROW) % ROW); }  // чек выхода за границы относительно 1 координаты N
-int relM(int m) { return ((m + COL) % COL); }  // чек выхода за границы относительно 1 координаты M
+int relN(int n) { return ((n + ROW) % ROW); }  // чек выхода за границы относительно координаты N
+int relM(int m) { return ((m + COL) % COL); }  // чек выхода за границы относительно координаты M
 
 int checkArea(int box[][COL], int n, int m) {
     int counter = 0;
-    
+
     counter += box[relN(n - 1)][relM(m - 1)];
     counter += box[relN(n - 1)][relM(m)];
     counter += box[relN(n - 1)][relM(m + 1)];
@@ -95,6 +81,7 @@ int checkArea(int box[][COL], int n, int m) {
 
 int nextState(int state, int counter) {
     int res = 0;
+
     if (state == 0) {
         res = (counter == 3) ? 1 : 0;
     } else if (state == 1) {
@@ -127,11 +114,10 @@ void generateEpoch(int box[][COL]) {
     int nextBox[ROW][COL];
     clear();
     prEpoch(box);
-    /* prDebug(box); */
-    /* nullBox(nextBox); */
     for (int n = 0; n < ROW; n++) {
         for (int m = 0; m < COL; m++) {
             nextBox[n][m] = nextState(box[n][m], checkArea(box, n, m));
+            // для каждой клетки возвращаем состояние и при этом проверяем границы
         }
     }
     copyBox(nextBox, box);
