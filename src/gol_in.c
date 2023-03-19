@@ -8,18 +8,22 @@
 void startBox(int[][COL], int *);
 void prEpoch(int[][COL]);        // рендер кадра
 void checkLimit();               // чек выхода за границы
-void genEpoch(int[][COL], int, int);  // 1 Эпоха
+void genEpoch(int[][COL]);  // 1 Эпоха
 int nextEpoch(int, int);
-int checkLocal(int[][COL], int[][COL], int, int);
+int checkLocal(int[][COL], int, int);
 void prDebug(int[][COL]);
 void nullBox(int[][COL]);
 int checkDie(int[][COL]);
 
 int main(void) {
     int speed;
-    int box[ROW][COL];  // тестовый бокс с нач состоянием
+    int countEpoch = 0;
+    int box[ROW][COL];  
     startBox(box, &speed);
-    genEpoch(box, 0, speed);
+    while (checkDie(box) && countEpoch++ < 10000) {
+        genEpoch(box);
+        usleep(speed);
+    }
     return (0);
 }
 
@@ -28,7 +32,7 @@ void startBox(int box[][COL], int *speed) {
     for (int n = 0; n < ROW; n++) {
         for (int m = 0; m <= COL; m++) {
             c = getchar();
-             box[n][m] = (c == '1') ? 1 : 0;
+            box[n][m] = (c == '1') ? 1 : 0;
         }
     }
 
@@ -36,7 +40,7 @@ void startBox(int box[][COL], int *speed) {
     printf("Введите скорость\n");
     printf("0 для стандартной (100 000)\n");
     scanf("%d", speed);
-    if (*speed == 0) { *speed = 100000; }
+    if (*speed == 0) { *speed = 50000; }
     
 }
 
@@ -71,29 +75,36 @@ void nullBox(int box[][COL]) {
     }
 }
 
-int checkLocal(int box[][COL], int nextBox[][COL], int n, int m) {
+int relativeM(int m) { return ((m + COL) % COL); }
+int relativeN(int n) { return ((n + ROW) % ROW); }
+
+int checkLocal(int box[][COL], int n, int m) {
     int counter = 0;
 
-    if (n == ROW - 1) {
-        if (box[n][m]) nextBox[n][m] = 1;
-    }
-    if (n == 0) {
-        if (box[n][m]) nextBox[n][m] = 1;
-    }
-    if (m == COL - 1) {
-        if (box[n][m]) nextBox[n][m] = 1;
-    }
-    if (m == 0) {
-        if (box[n][m]) nextBox[n][m] = 1;
-    }
-    counter += box[n - 1][m - 1];
-    counter += box[n - 1][m];
-    counter += box[n - 1][m + 1];
-    counter += box[n][m - 1];
-    counter += box[n][m + 1];
-    counter += box[n + 1][m - 1];
-    counter += box[n + 1][m];
-    counter += box[n + 1][m + 1];
+    /* if (n == ROW - 1) { */
+    /*     if (box[n][m]) nextBox[n][m] = 1; */
+    /* } */
+    /* if (n == 0) { */
+    /*     if (box[n][m]) nextBox[n][m] = 1; */
+    /* } */
+    /* if (m == COL - 1) { */
+    /*     if (box[n][m]) nextBox[n][m] = 1; */
+    /* } */
+    /* if (m == 0) { */
+    /*     if (box[n][m]) nextBox[n][m] = 1; */
+    /* } */
+    /* if (n == ROW - 1) { */ 
+    /*     if (box[0][m] == 0)  } */
+    /* if (n == 0) { n = ROW - 1; } */
+    
+    counter += box[relativeN(n - 1)][relativeM(m - 1)];
+    counter += box[relativeN(n - 1)][relativeM(m)];
+    counter += box[relativeN(n - 1)][relativeM(m + 1)];
+    counter += box[relativeN(n)][relativeM(m - 1)];
+    counter += box[relativeN(n)][relativeM(m + 1)];
+    counter += box[relativeN(n + 1)][relativeM(m - 1)];
+    counter += box[relativeN(n + 1)][relativeM(m)];
+    counter += box[relativeN(n + 1)][relativeM(m + 1)];
     return (counter);
 }
 
@@ -119,19 +130,24 @@ void prDebug(int box[][COL]) {
     }
 }
 
-void genEpoch(int box[][COL], int countEpoch, int speed) {
-    int nextBox[ROW][COL];
-    /* prDebug(box); */
-    nullBox(nextBox);
-    if (checkDie(box) && countEpoch < 10000) {
-        clear();
-        prEpoch(box);
-        for (int n = 0; n < ROW; n++) {
-            for (int m = 0; m < COL; m++) {
-                nextBox[n][m] = nextEpoch(box[n][m], checkLocal(box, nextBox, n, m));
-            }
+void copyBox(int outBox[][COL], int inBox[][COL]) {
+    for (int n = 0; n < ROW; n++) {
+        for (int m = 0; m < COL; m++) {
+            inBox[n][m] = outBox[n][m];
         }
-        usleep(speed);
-        genEpoch(nextBox, ++countEpoch, speed);
     }
+}
+
+void genEpoch(int box[][COL]) {
+    int nextBox[ROW][COL];
+    clear();
+    /* prDebug(box); */
+    /* nullBox(nextBox); */
+    prEpoch(box);
+    for (int n = 0; n < ROW; n++) {
+        for (int m = 0; m < COL; m++) {
+            nextBox[n][m] = nextEpoch(box[n][m], checkLocal(box, n, m));
+        }
+    }
+    copyBox(nextBox, box);
 }
