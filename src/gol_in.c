@@ -3,7 +3,7 @@
 
 #define ROW 25
 #define COL 80
-#define clear() printf("\033[H\033[J")
+#define cclear() printf("\033[H\033[J")
 
 void startBox(int[][COL], int *);  // Забираем начальный бокс и Считываем скорость
 void generateEpoch(int[][COL]);  // Генерация Эпохи
@@ -112,7 +112,7 @@ void copyBox(int outBox[][COL], int inBox[][COL]) {
 
 void generateEpoch(int box[][COL]) {
     int nextBox[ROW][COL];
-    clear();
+    cclear();
     prEpoch(box);
     for (int n = 0; n < ROW; n++) {
         for (int m = 0; m < COL; m++) {
